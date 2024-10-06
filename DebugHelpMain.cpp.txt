@@ -1,0 +1,127 @@
+// DebugHelper.cpp : This file contains the 'main' function. Program execution begins and ends there.
+//
+
+#include <iostream>
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <map>
+#include <algorithm>
+
+#include <vector>
+using namespace std;
+struct summary {
+    map<string, string> pMap;
+}Summary;
+bool findSubstringCaseInsensitive(const std::string& str, const std::string& substr) {
+    std::string::const_iterator it = std::search(str.begin(), str.end(),
+        substr.begin(), substr.end(),
+        [](char c1, char c2) { return std::tolower(c1) == std::tolower(c2); });
+    return it != str.end();
+}
+
+void showFailLogs() {
+    string outfilePath = "processed.txt";
+    std::ifstream inputFile(outfilePath);
+
+    if (!inputFile.is_open()) {
+        cout << "Error opening processed file " << outfilePath << std::endl;
+        return;
+    }
+
+    string line;
+    while (getline(inputFile, line)) {
+        stringstream ss(line);
+        string word;
+        for (int i = 0; i < 5; i++)
+            ss >> word;
+        string substr = "E";
+        
+        size_t found = word.find(substr);
+       
+        if(found != string::npos)
+            cout << line << std::endl;
+    }
+}
+void generateSummary(string str) {
+    stringstream ss{ str };
+    string pid;
+    
+    ss >> pid;
+    ss >> pid;
+    ss >> pid;
+    
+    string processName;
+    ss >> processName;
+    ss >> processName;
+    ss >> processName;
+    Summary.pMap.insert({ pid, processName });
+}
+int main(int argc, char* argv[])
+{
+    string infilePath = "output.txt";
+    if (argc > 1) {
+        cout << "argc count is " << argc << endl;
+        infilePath = argv[1];
+    }
+    
+    string outfilePath = "processed.txt";
+    std::ifstream inputFile(infilePath);
+
+    if (!inputFile.is_open()) {
+        cout << "Error opening file " <<infilePath<< std::endl;
+        return -1;
+    }
+    std::ofstream processedFile(outfilePath);
+
+    if (!processedFile.is_open()) {
+        cout << "Error opening file" <<outfilePath<< std::endl;
+        return -1;
+    }
+    string line;
+    int count = 0;
+    vector<string> processKeys = { "camera", "fatal" };
+
+    while (getline(inputFile, line)) {
+        
+        for (const std::string& substr : processKeys) {
+            
+            if (findSubstringCaseInsensitive(line, substr)) {
+                //generate summary
+                generateSummary(line);
+                processedFile << line << endl;
+
+                cout << line << std::endl;
+                break;
+            }
+        }
+    }
+    inputFile.close();
+
+    char choice = 'a';
+    while (1) {
+        cout <<endl<< "e ->exit" << "  s ->summary" << "  c ->calltrace" << "  f ->fail\\error" << endl;
+        choice = getchar();
+        switch (choice) {
+        case 'e':
+        case 'E':
+            cout << "exiting" << endl;
+            return 0;
+        case 's':
+        case 'S':
+            cout << "summary " << endl;
+            for (auto itr : Summary.pMap) {
+                cout << itr.first<<"   ->   "<<itr.second << endl;
+                
+            }
+            break;
+        case 'f':
+            cout << "Failure logs " << endl;
+            showFailLogs();
+        }
+    }
+    processedFile.close();
+    
+
+}
